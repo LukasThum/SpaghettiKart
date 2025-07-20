@@ -395,6 +395,23 @@ void PortMenu::AddEnhancements() {
         .Options(FloatSliderOptions().Min(-50.0f).Max(50.0f).DefaultValue(0.0f).Tooltip(
             "When Disable Wall Collision are enable what is the minimal height you can get."));
 
+    // Lukas CPU Tab
+    AddSidebarEntry("Enhancements", "Lukas CPU", 3);
+    path = { "Enhancements", "Lukas CPU", SECTION_COLUMN_1 };
+
+    AddWidget(path, "Enable Lukas CPU", WIDGET_CVAR_CHECKBOX)
+        .CVar("gEnableLukasCPU");
+    AddWidget(path, "Halt CPU", WIDGET_CVAR_CHECKBOX)
+        .CVar("gHaltCPU")
+        .PreFunc([](WidgetInfo& info) {
+             info.isHidden = !CVarGetInteger("gEnableLukasCPU", 0);
+         });
+    AddWidget(path, "Silly CPU", WIDGET_CVAR_CHECKBOX)
+        .CVar("gSillyCPU")
+        .PreFunc([](WidgetInfo& info) {
+             info.isHidden = !CVarGetInteger("gEnableLukasCPU", 0);
+         });
+
 #if not defined(__SWITCH__) and not defined(__WIIU__)
     path = { "Enhancements", "HM64 Lab", SECTION_COLUMN_1 };
     AddSidebarEntry("Enhancements", "HM64 Lab", 4);

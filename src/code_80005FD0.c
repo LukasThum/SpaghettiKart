@@ -41,6 +41,8 @@
 #include "port/Game.h"
 #include "engine/courses/Course.h"
 
+#include "enhancements/lukas_cpu.h"
+
 s32 unk_code_80005FD0_pad[24];
 Collision D_80162E70;
 s16 D_80162EB0; // Possibly a float.
@@ -1597,6 +1599,9 @@ void update_player_timer_sound(s32 playerId, UNUSED Player* unused) {
 }
 
 void update_player(s32 playerId) {
+  if (CVarGetInteger("gEnableLukasCPU", 0) == 1) {
+    lukas_cpu_update_player(playerId);
+  } else {
     UNUSED s32 pad[14];
     s16 var_a0_2;
     s16 newAngle;
@@ -2004,6 +2009,7 @@ void update_player(s32 playerId) {
             }
         }
     }
+  }
 }
 
 void func_8000B140(s32 playerId) {
