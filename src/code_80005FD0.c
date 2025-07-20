@@ -1600,8 +1600,10 @@ void update_player_timer_sound(s32 playerId, UNUSED Player* unused) {
 
 void update_player(s32 playerId) {
   if (CVarGetInteger("gEnableLukasCPU", 0) == 1) {
+    lukas_cpu_initialize(); // will only process once
     lukas_cpu_update_player(playerId);
   } else {
+    lukas_cpu_terminate(); // back to vanilla cpu
     UNUSED s32 pad[14];
     s16 var_a0_2;
     s16 newAngle;

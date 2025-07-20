@@ -166,6 +166,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/properties.h.in ${CMAKE_CURRENT_SOURCE_DIR}/properties.h @ONLY)
 endif()
 
+# Find lua library
+find_package(Lua51 REQUIRED)
+
 # Include directories
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}
@@ -185,6 +188,7 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/engine/particles
     ${CMAKE_CURRENT_SOURCE_DIR}/src/enhancements
     ${CMAKE_CURRENT_SOURCE_DIR}/src/enhancements/freecam
+    ${LUA_INCLUDE_DIR}
 )
 
 # Collect source files to build the executable
@@ -479,7 +483,7 @@ option(BUILD_SF64 "Build with Star Fox 64 support" OFF)
 option(BUILD_FZERO "Build with F-Zero X support" OFF)
 
 add_subdirectory(torch)
-target_link_libraries(${PROJECT_NAME} PRIVATE torch "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
+target_link_libraries(${PROJECT_NAME} PRIVATE torch ${LUA_LIBRARIES} "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
 if(CMAKE_SYSTEM_NAME MATCHES "NintendoSwitch")
 
