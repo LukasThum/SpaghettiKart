@@ -1,19 +1,17 @@
-if player.isHuman then
-  if player.speed > 60 then
-    decelerate(player.id)
-    -- player.infos.cooldown = 3
-    -- if player.infos.cooldown > 2  then
-    -- else
-      -- player.infos.cooldown = 1
-      -- player.infos.cooldown += player.infos.cooldown - 1
-    -- end
-  else
-    player.infos.cooldown = 30
-  end
-    accelerate(player.id)
-  if math.random(100) < 20 then
-    -- print("current speed : ", player.speed)
-    -- print("cooldown: ", player.infos.cooldown)
-  end
-  print(player.infos.cooldown)
+if firstRun then
+  print(player.id, ": ", player.name);
+  state.lastSteer = 0
+  state.lastAccelerate = 0
+else
+  -- if player.isHuman then
+    local steerRange = 0.1
+    local steerRand = (math.random() * 2 * steerRange) - steerRange
+    state.lastSteer = clamp(-1, state.lastSteer + steerRand, 1)
+    print("steering: ", player.id, state.lastSteer)
+    -- cpu steers differently
+    steer(player.id, state.lastSteer)
+    if (math.random() > 0.1) then
+      accelerate(player.id)
+    end
+  -- end
 end

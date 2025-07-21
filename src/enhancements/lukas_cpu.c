@@ -28,7 +28,8 @@ char* character_names[8] = {
   "Bowser"
 };
 
-char* player_infos[8] = {
+char* player_state[16] = {
+  "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}",
   "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"
 };
 
@@ -36,11 +37,16 @@ char* player_infos[8] = {
 int places_interval_max = 100;
 int places_interval = 0;
 int initialized = 0;
+int lastPlayerId = 0;
+int firstRun = 1;
+
 lua_State * lua_state;
 char* lua_start_file = "../assets/scripts/lukas_cpu/on_start.lua";
 char* lua_file = "../assets/scripts/lukas_cpu/test_001.lua";
 char* lua_end_file = "../assets/scripts/lukas_cpu/on_end.lua";
 char* lua_code = "print('no code to run!')";
+int lua_file_reload_interval = 0;
+int lua_file_reload_interval_max = 1000;
 
 char* concat(const char *s1, const char *s2)
 {
@@ -67,13 +73,11 @@ char* lukas_cpu_read_file(char* filename) {
 }
 
 void load_code() {
-  // unstable
   lua_code = concat(concat(
     lukas_cpu_read_file(lua_start_file),
     lukas_cpu_read_file(lua_file)),
     lukas_cpu_read_file(lua_end_file)
   );
-  printf("running code:\n%s", lua_code);
 }
 
 void add_field_boolean(lua_State *state, char* name, int boolean) {
@@ -126,12 +130,12 @@ void steer(Player* player, f32 amount) {
   if (amount > 1.0) {
     amount_clamped = 1.0;
   }
-  player->unk_07C = 3475000 * amount_clamped;
+  player->unk_07C = round(3475000.0 * amount_clamped);
 }
 // provide function for lua
 int lua_steer(lua_State *state) {
   int playerId = luaL_checknumber(state, 1);
-  int amount = luaL_checknumber(state, 2);
+  float amount = luaL_checknumber(state, 2);
   Player* player = &gPlayers[playerId];
   steer(player, amount);
   return 0;
@@ -166,18 +170,17 @@ int lua_get_player(lua_State *state) {
   return 1;
 }
 
-int lua_get_player_infos(lua_State *state) {
+int lua_get_player_state(lua_State *state) {
   int playerId = lua_tonumber(state, 1);
-  char* infos = player_infos[playerId];
-  // printf("%s\n", infos);
-  lua_pushstring(lua_state, infos);
+  char* pstate = player_state[playerId];
+  lua_pushstring(lua_state, pstate);
   return 1;
 }
-int lua_set_player_infos(lua_State *state) {
+int lua_set_player_state(lua_State *state) {
   int playerId = lua_tonumber(state, 1);
-  char* playerInfos = lua_tostring(state, 2);
-  printf("%s\n", playerInfos);
-  player_infos[playerId] = playerInfos;
+  char* pstate = lua_tostring(state, 2);
+  player_state[playerId] = malloc(strlen(pstate) + 1);
+  strcpy(player_state[playerId], pstate);
   return 0;
 }
 
@@ -199,23 +202,32 @@ int lua_get_next_checkpoint(lua_State *state) {
 void lukas_cpu_initialize() {
   if (initialized < 1) {
     printf("Lukas CPU started!\n");
+    firstRun = 1;
     load_code();
     lua_state = luaL_newstate();
     luaL_openlibs(lua_state);
+
     lua_pushcfunction(lua_state, lua_accelerate);
     lua_setglobal(lua_state, "accelerate");
+
     lua_pushcfunction(lua_state, lua_decelerate);
     lua_setglobal(lua_state, "decelerate");
+
     lua_pushcfunction(lua_state, lua_steer);
     lua_setglobal(lua_state, "steer");
+
     lua_pushcfunction(lua_state, lua_get_player);
     lua_setglobal(lua_state, "getPlayerRaw");
-    lua_pushcfunction(lua_state, lua_get_player_infos);
-    lua_setglobal(lua_state, "getPlayerInfos");
-    lua_pushcfunction(lua_state, lua_set_player_infos);
-    lua_setglobal(lua_state, "setPlayerInfos");
+
+    lua_pushcfunction(lua_state, lua_get_player_state);
+    lua_setglobal(lua_state, "getPlayerState");
+
+    lua_pushcfunction(lua_state, lua_set_player_state);
+    lua_setglobal(lua_state, "setPlayerState");
+
     lua_pushcfunction(lua_state, lua_get_next_checkpoint);
     lua_setglobal(lua_state, "getNextCheckpointRaw");
+
     initialized = 1;
   }
 }
@@ -232,6 +244,9 @@ void lukas_cpu_terminate() {
 void lukas_cpu_update_player(s32 playerId) {
   Player* player;
   player = &gPlayers[playerId];
+  if (lastPlayerId > playerId) {
+    firstRun = 0;
+  }
   update_player_path_completion(playerId, player);
   if (player->type & PLAYER_HUMAN) {
     detect_wrong_player_direction(playerId, player);
@@ -244,15 +259,25 @@ void lukas_cpu_update_player(s32 playerId) {
       return;
     }
   }
+  // reload file ever so often
+  lua_file_reload_interval++;
+  if (lua_file_reload_interval > lua_file_reload_interval_max) {
+    load_code();
+    lua_file_reload_interval = 0;
+  }
   // hand over to lua scripts
   lua_pushnumber(lua_state, playerId);
   lua_setglobal(lua_state, "playerId");
+  lua_pushboolean(lua_state, firstRun);
+  lua_setglobal(lua_state, "firstRun");
   if (luaL_dostring(lua_state, lua_code)) {
     printf("Error: %s\n", lua_tostring(lua_state, -1));
   }
+  // calculate new ranks ever so ofter
   if (places_interval > places_interval_max) {
     set_places();
     places_interval = 0;
   }
   places_interval++;
+  lastPlayerId = playerId;
 }
