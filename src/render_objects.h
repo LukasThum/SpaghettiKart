@@ -411,6 +411,9 @@ void func_80057B14(s32, s32, char*, u32);
 void func_80057B80(s32, s32, char*, u32);
 void func_80057BEC(s32, s32, char*, u32);
 
+void lukas_cpu_set_debug_text(int row, char* text);
+void lukas_cpu_render_debug_text();
+
 extern Lights1 D_800E45C0[];
 extern Lights1 D_800E4668;
 

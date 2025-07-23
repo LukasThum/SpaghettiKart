@@ -961,6 +961,8 @@ void func_80058F78(void) {
 
         // @port Pop the transform id.
         FrameInterpolation_RecordCloseChild();
+    } else {
+        lukas_cpu_render_debug_text(PLAYER_ONE);
     }
 }
 

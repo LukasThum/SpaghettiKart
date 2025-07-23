@@ -10,12 +10,17 @@
 
 #include "lukas_cpu.h"
 #include "math_util.h"
+#include "math_util_2.h"
 #include "common_structs.h"
+#include "menu_items.h"
 #include "render_objects.h"
+#include "render_player.h"
+#include "skybox_and_splitscreen.h"
 #include "kart_attributes.h"
 #include "waypoints.h"
 #include "player_controller.h"
 #include "code_80005FD0.h"
+#include "code_80057C60.h"
 
 char* character_names[8] = {
   "Mario",
@@ -28,10 +33,7 @@ char* character_names[8] = {
   "Bowser"
 };
 
-char* player_state[16] = {
-  "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}",
-  "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"
-};
+char* player_state[8] = {"{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}"};
 
 // frequency to recalculate places (ranks), not needed every tick and player
 int places_interval_max = 100;
@@ -111,7 +113,7 @@ int lua_accelerate(lua_State *state) {
 
 // should be exactly what happens when human presses b button
 void decelerate(Player* player) {
-  func_800323E4(player);
+  player_decelerate(player, 5.0f);
 }
 // provide function for lua
 int lua_decelerate(lua_State *state) {
@@ -122,7 +124,8 @@ int lua_decelerate(lua_State *state) {
 }
 
 // should be exactly what happens when human uses stick
-void steer(Player* player, f32 amount) {
+void steer(int playerId, f32 amount) {
+  Player* player = &gPlayers[playerId];
   f32 amount_clamped = amount;
   if (amount < -1.0) {
     amount_clamped = -1.0;
@@ -130,14 +133,15 @@ void steer(Player* player, f32 amount) {
   if (amount > 1.0) {
     amount_clamped = 1.0;
   }
-  player->unk_07C = round(3475000.0 * amount_clamped);
+  int amount_int = round(3475000.0 * amount_clamped);
+  player->unk_07C = amount_int;
+  // func_8002A8A4(player, amount_int);
 }
 // provide function for lua
 int lua_steer(lua_State *state) {
   int playerId = luaL_checknumber(state, 1);
   float amount = luaL_checknumber(state, 2);
-  Player* player = &gPlayers[playerId];
-  steer(player, amount);
+  steer(playerId, amount);
   return 0;
 }
 
@@ -147,23 +151,24 @@ int lua_get_player(lua_State *state) {
   lua_createtable(state, 0, 17);
   add_field_boolean(state, "isHuman", player->type & PLAYER_HUMAN);
   add_field_string(state, "name", character_names[player->characterId]);
-  add_field_integer(state, "id", playerId);
   add_field_integer(state, "speed", (int) (player->speed * 12.5));
-  add_field_number(state, "rank", player->currentRank);
-  add_field_number(state, "laps", player->lapCount);
+  // f32 speed = (gPlayers[playerIdx].speed / 18.0f) * 216.0f;
   add_field_number(state, "locX", player->pos[0]);
   add_field_number(state, "locY", player->pos[1]);
   add_field_number(state, "locZ", player->pos[2]);
-  add_field_number(state, "topSpeed", player->topSpeed);
+  add_field_integer(state, "driftCombos", player->driftState);
+  add_field_number(state, "laps", player->lapCount);
+  add_field_number(state, "rank", player->currentRank);
   add_field_number(state, "velX", player->velocity[0]);
   add_field_number(state, "velY", player->velocity[1]);
   add_field_number(state, "velZ", player->velocity[2]);
   add_field_number(state, "rotX", player->rotation[0]);
   add_field_number(state, "rotY", player->rotation[1]);
   add_field_number(state, "rotZ", player->rotation[2]);
+  add_field_number(state, "topSpeed", player->topSpeed);
   add_field_number(state, "propulsion", player->kartPropulsionStrength);
-  add_field_integer(state, "driftCombos", player->driftState);
   add_field_number(state, "steering", player->unk_07C);
+  add_field_integer(state, "id", playerId);
 
   // add_field_number(state, "effects", player->effects);
   // add_field_number(state, "currentSpeed", player->currentSpeed);
@@ -198,6 +203,13 @@ int lua_get_next_checkpoint(lua_State *state) {
   return 1;
 }
 
+int lua_set_debug_text(lua_State *state) {
+  int row = lua_tonumber(state, 1);
+  char* debug_text = lua_tostring(state, 2);
+  lukas_cpu_set_debug_text(row, debug_text);
+  return 0;
+}
+
 // run once when started
 void lukas_cpu_initialize() {
   if (initialized < 1) {
@@ -225,8 +237,10 @@ void lukas_cpu_initialize() {
     lua_pushcfunction(lua_state, lua_set_player_state);
     lua_setglobal(lua_state, "setPlayerState");
 
-    lua_pushcfunction(lua_state, lua_get_next_checkpoint);
-    lua_setglobal(lua_state, "getNextCheckpointRaw");
+    lua_pushcfunction(lua_state, lua_set_debug_text);
+    lua_setglobal(lua_state, "setDebugText");
+
+    gHUDDisable = 1;
 
     initialized = 1;
   }
@@ -237,6 +251,7 @@ void lukas_cpu_terminate() {
   if (initialized > 0) {
     printf("Lukas CPU stopped!\n");
     lua_close(lua_state);
+    gHUDDisable = 0;
     initialized = 0;
   }
 }
@@ -249,8 +264,8 @@ void lukas_cpu_update_player(s32 playerId) {
   }
   update_player_path_completion(playerId, player);
   if (player->type & PLAYER_HUMAN) {
-    detect_wrong_player_direction(playerId, player);
-    // if (rand() % 100 < 1) { }
+    // TODO: toggle for this?
+    // detect_wrong_player_direction(playerId, player);
   } else if (player->type & PLAYER_CPU) {
     if (CVarGetInteger("gHaltCPU", 0) == 1) {
       // halt and catch fire

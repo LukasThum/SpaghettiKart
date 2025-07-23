@@ -3,6 +3,7 @@
  * A more suitable name may be print.c
  **/
 
+#include <stdlib.h>
 #include <libultraship.h>
 #include <libultra/gbi.h>
 #include <stdio.h>
@@ -2700,6 +2701,26 @@ void func_8004EB38(s32 playerId) {
         func_8004C9D8_wide(temp_s0->lapAfterImage2X + 0x1C, (s32) temp_s0->lapY, 0x00000050,
                            (u8*) gHudLapTextures[temp_s0->alsoLapCount], 0x00000020, 0x00000010, 0x00000020,
                            0x00000010);
+    }
+}
+
+char* lukas_cpu_debug_text[16] = {
+    "", "", "", "", "", "", "", "",
+    "", "", "", "", "", "", "", ""
+};
+void lukas_cpu_set_debug_text(int row, char* text) {
+    lukas_cpu_debug_text[row] = malloc(strlen(text) + 1);
+    strcpy(lukas_cpu_debug_text[row], text);
+}
+
+void lukas_cpu_render_debug_text() {
+    set_text_color(TEXT_YELLOW);
+    for (int i = 0; i < 16; i++) {
+        text_draw_wide(
+            0, 16 * i,
+            lukas_cpu_debug_text[i],
+            0, 0.75f, 0.7f
+        );
     }
 }
 
