@@ -76,6 +76,8 @@ bool CreateDirectoryRecursive(std::string const& dirName, std::error_code& err) 
 }
 
 GameEngine::GameEngine() {
+    // Initialize context properties early to recognize paths properly for non-portable builds
+    this->context = Ship::Context::CreateUninitializedInstance("Spaghetti Kart", "spaghettify", "spaghettify.cfg.json");
 
     const std::string main_path = Ship::Context::GetPathRelativeToAppDirectory("mk64.o2r");
     const std::string assets_path = Ship::Context::LocateFileAcrossAppDirs("spaghetti.o2r");
@@ -120,8 +122,6 @@ GameEngine::GameEngine() {
             }
         }
     }
-
-    this->context = Ship::Context::CreateUninitializedInstance("Spaghetti Kart", "spaghettify", "spaghettify.cfg.json");
 
     this->context->InitConfiguration();    // without this line InitConsoleVariables fails at Config::Reload()
     this->context->InitConsoleVariables(); // without this line the controldeck constructor failes in
