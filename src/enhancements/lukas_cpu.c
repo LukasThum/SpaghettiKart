@@ -142,6 +142,7 @@ int lua_steer(lua_State *state) {
   int playerId = luaL_checknumber(state, 1);
   float amount = luaL_checknumber(state, 2);
   steer(playerId, amount);
+  // apply_cpu_turn(playerId, amount);
   return 0;
 }
 
@@ -172,6 +173,9 @@ int lua_get_player(lua_State *state) {
 
   // add_field_number(state, "effects", player->effects);
   // add_field_number(state, "currentSpeed", player->currentSpeed);
+  // gNumPathPointsTraversed[playerId] 
+  // gCourseCompletionPercentByPlayerId[playerId] = -1000.0f;
+  // gLapCompletionPercentByPlayerId[playerId] = -1000.0f;
   return 1;
 }
 

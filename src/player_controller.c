@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <libultraship.h>
 #include <macros.h>
 #include <defines.h>
@@ -242,10 +241,10 @@ void func_80027DA8(Player* player, s8 playerId) {
 
 void func_80027EDC(Player* player, s8 playerId) {
     UNUSED s32 pad;
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if (((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
+        ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
 
-        // CM_WhatDoesThisDo(player, playerId);
+        CM_WhatDoesThisDo(player, playerId);
 
         // switch (gCurrentCourseId) {
         //     // case COURSE_MARIO_RACEWAY:
@@ -379,7 +378,7 @@ void func_80027EDC(Player* player, s8 playerId) {
         // }
     } else {
 
-        // CM_WhatDoesThisDoAI(player, playerId);
+        CM_WhatDoesThisDoAI(player, playerId);
 
         // switch (gCurrentCourseId) {
         //     case COURSE_MARIO_RACEWAY:
@@ -607,9 +606,9 @@ void func_80028864(Player* player, Camera* camera, s8 playerId, s8 screenId) {
     } else if (player->type & 0x80) {
         func_8002D268(player, camera, screenId, playerId);
     } else {
-        // if ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN) {
+        if ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN) {
             player->currentSpeed = 50.0f;
-        // }
+        }
         player->effects &= ~8;
     }
 }
@@ -1881,9 +1880,9 @@ void func_8002C7E4(Player* player, s8 arg1, s8 arg2) {
             player->unk_044 &= ~0x0001;
             player->unk_046 |= 1;
             player->unk_046 |= 8;
-            // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+            if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
                 func_8001CA24(player, 2.8f);
-            // }
+            }
             if ((player->unk_046 & 2) == 2) {
                 if ((player->unk_046 & 4) != 4) {
                     player->unk_046 |= 4;
@@ -1934,8 +1933,7 @@ void func_8002C954(Player* player, s8 playerId, Vec3f arg2) {
         }
         player->unk_046 |= 0x20;
     }
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if ((((player->speed / 18.0f) * 216.0f) > 30.0f)) {
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) && (((player->speed / 18.0f) * 216.0f) > 30.0f)) {
         func_8001CA24(player, 3.0f);
     }
     player->unk_046 |= 0x10;
@@ -1946,7 +1944,7 @@ void func_8002C954(Player* player, s8 playerId, Vec3f arg2) {
     if ((player->slopeAccel >= 0) && (((player->speed / 18.0f) * 216.0f) > 5.0f)) {
         player_decelerate_alternative(player, 18.0f);
     }
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         xdist = gPlayerLastVelocity[playerId][0] - arg2[0];
         var_f14 = gPlayerLastVelocity[playerId][1] - arg2[1];
         ydist = var_f14; // okay
@@ -1966,7 +1964,7 @@ void func_8002C954(Player* player, s8 playerId, Vec3f arg2) {
                 func_800CAEC4(playerId, var_f14);
             }
         }
-    // }
+    }
     if (player->effects & BOOST_EFFECT) {
         remove_boost_effect(player);
         player->kartPropulsionStrength /= 2;
@@ -2129,12 +2127,12 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
 
     func_80027EDC(player, playerId);
     func_8002C11C(player);
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         func_8002A79C(player, playerId);
-    // }
+    }
     func_8002B830(player, playerId, screenId);
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB) {
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
+        ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
         func_8002BF4C(player, playerId);
     }
     apply_effect(player, playerId, screenId);
@@ -2302,9 +2300,9 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
                 ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
                 func_800CADD0((u8) playerId, ((f32) player->unk_0C2) / 35.0f);
             }
-            // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+            if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
                 player->unk_044 |= 0x100;
-            // }
+            }
         }
         if (((player->unk_0C2 < 0x1C) && (player->unk_0C2 >= 4)) && (((player->speed / 18.0f) * 216.0f) >= 20.0f)) {
             player->unk_DB4.unk18 = 0;
@@ -2358,8 +2356,8 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
         func_8008F5A4(player, playerId);
     }
     player->unk_074 = calculate_surface_height(nextX, nextY, nextZ, player->collision.meshIndexZX);
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if ((((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL)) ||
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
+        (((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL)) ||
         (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL))) {
         func_80029B4C(player, nextX, nextY, nextZ);
     } else {
@@ -2383,9 +2381,9 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
     if (CVarGetInteger("gNoWallColision", 0)) {
         player->pos[1] = nextY < CVarGetFloat("gMinHeight", 0.0f) ? CVarGetFloat("gMinHeight", 0.0f) : nextY;
     }
-    // if ((player->type & PLAYER_HUMAN) && (!(player->type & PLAYER_CPU))) {
+    if ((player->type & PLAYER_HUMAN) && (!(player->type & PLAYER_CPU))) {
         func_8002BB9C(player, &nextX, &nextZ, screenId, playerId, newVelocity);
-    // }
+    }
     player->unk_064[0] = sp178[0];
     player->unk_064[2] = sp178[2];
     player->velocity[0] = newVelocity[0];
@@ -2394,7 +2392,7 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
     gPlayerLastVelocity[playerId][0] = newVelocity[0];
     gPlayerLastVelocity[playerId][1] = newVelocity[1];
     gPlayerLastVelocity[playerId][2] = newVelocity[2];
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         if (gKartTopSpeedTable[player->characterId] < player->speed) {
             temp = gKartTopSpeedTable[player->characterId] / player->speed;
             player->velocity[0] *= temp;
@@ -2402,7 +2400,7 @@ void func_8002D268(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
             player->velocity[2] *= temp;
             player->speed = gKartTopSpeedTable[player->characterId];
         }
-    // }
+    }
     if ((player->unk_044 & 1) == 1) {
         if (player->speed > 1) {
             temp = 1 / player->speed;
@@ -2556,9 +2554,9 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
                     ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
                     func_800CADD0((u8) playerId, ((f32) player->unk_0C2) / 50.0f);
                 }
-                // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+                if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
                     player->unk_044 |= 0x100;
-                // }
+                }
             }
             if (((player->unk_0C2 < 0x1C) && (player->unk_0C2 >= 0xA)) &&
                 (((player->speed / 18.0f) * 216.0f) >= 20.0f)) {
@@ -2568,9 +2566,9 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
                     ((player->type & PLAYER_INVISIBLE_OR_BOMB) != PLAYER_INVISIBLE_OR_BOMB)) {
                     func_800CADD0((u8) playerId, ((f32) player->unk_0C2) / 50.0f);
                 }
-                // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+                if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
                     player->unk_044 |= 0x100;
-                // }
+                }
             }
             player->unk_0C2 = 0;
         } else {
@@ -2593,9 +2591,9 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
                     player->unk_0C2 /= 7.5;
                     player->kartHopJerk = 0.06f;
                     player->kartHopAcceleration = 0.0f;
-                    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+                    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
                         player->unk_044 |= 0x100;
-                    // }
+                    }
                 }
             } else {
                 player->unk_0C2 = 0;
@@ -2642,8 +2640,8 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
         func_8008F5A4(player, playerId);
     }
     player->unk_074 = calculate_surface_height(spD0, spCC, spC8, player->collision.meshIndexZX);
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if ((((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL)) ||
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
+        (((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL)) ||
          (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL))) {
         func_80029B4C(player, spD0, spCC, spC8);
     } else {
@@ -2668,7 +2666,7 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
     player->velocity[0] = sp54[0];
     player->velocity[1] = sp54[1];
     player->velocity[2] = sp54[2];
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         if (gKartTopSpeedTable[player->characterId] < player->speed) {
             temp_f0_6 = gKartTopSpeedTable[player->characterId] / player->speed;
             player->velocity[0] *= temp_f0_6;
@@ -2676,7 +2674,7 @@ void func_8002E594(Player* player, UNUSED Camera* camera, s8 screenId, s8 player
             player->velocity[2] *= temp_f0_6;
             player->speed = gKartTopSpeedTable[player->characterId];
         }
-    // }
+    }
     update_player_environment_and_hazard_state(player, playerId);
 }
 
@@ -2822,8 +2820,8 @@ void func_8002F730(Player* player, UNUSED Camera* camera, UNUSED s8 screenId, s8
         func_8003F46C(player, sp5C, sp68, spE8, &sp78, &spCC, &spC8, &spC4);
     }
     player->unk_074 = calculate_surface_height(spCC, spC8, spC4, player->collision.meshIndexZX);
-    // if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
-    if (((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL) ||
+    if (((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) &&
+        ((gActiveScreenMode == SCREEN_MODE_1P) || (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL) ||
          (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL))) {
         func_80029B4C(player, spCC, spC8, spC4);
     } else {
@@ -2853,7 +2851,7 @@ void func_8002F730(Player* player, UNUSED Camera* camera, UNUSED s8 screenId, s8
     gPlayerLastVelocity[playerId][1] = sp68[1];
     gPlayerLastVelocity[playerId][2] = sp68[2];
 
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         if (gKartTopSpeedTable[player->characterId] < player->speed) {
             temp_f0_2 = gKartTopSpeedTable[player->characterId] / player->speed;
             player->velocity[0] *= temp_f0_2;
@@ -2861,7 +2859,7 @@ void func_8002F730(Player* player, UNUSED Camera* camera, UNUSED s8 screenId, s8
             player->velocity[2] *= temp_f0_2;
             player->speed = gKartTopSpeedTable[player->characterId];
         }
-    // }
+    }
 }
 
 void func_8002FCA8(Player* player, s8 arg1) {
@@ -2896,7 +2894,7 @@ void func_8002FCA8(Player* player, s8 arg1) {
             var_f0 += 1.0;
         }
     }
-    if (((player->effects & 0x200000) == 0x200000)) { // && ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN)) {
+    if (((player->effects & 0x200000) == 0x200000) && ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN)) {
         var_f0 = -3.0f;
     }
 
@@ -3050,14 +3048,14 @@ f32 func_80030150(Player* player, s8 arg1) {
             }
         }
     }
-    // if ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN) {
         if ((player->effects & 0x200000) == 0x200000) {
             move_f32_towards(&player->unk_0E8, 380.0f, 0.5f);
         } else {
             move_f32_towards(&player->unk_0E8, 0.0f, 0.1f);
         }
-    // }
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    }
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         if (((player->effects & 0x100) == 0x100) && ((player->effects & DRIFTING_EFFECT) != DRIFTING_EFFECT)) {
             move_f32_towards(&player->unk_0E8, 580.0f, 0.2f);
         } else {
@@ -3068,7 +3066,7 @@ f32 func_80030150(Player* player, s8 arg1) {
         } else {
             move_f32_towards(&player->unk_0E4, 0.0f, 0.01f);
         }
-    // }
+    }
     move_f32_towards(&player->unk_104, var_f0, gKartTurnSpeedReductionTable1[player->characterId] + 0.05);
     var_f2 = (player->kartPropulsionStrength + player->unk_0E8 + player->boostPower + player->unk_0E4) - player->unk_0A0;
     if (var_f2 < 0.0f) {
@@ -4261,7 +4259,7 @@ void func_80036C5C(Player* player) {
 void func_80036CB4(Player* player) {
     s32 test;
 
-    if (((player->effects & DRIFTING_EFFECT) == DRIFTING_EFFECT)) { // && ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN)) {
+    if (((player->effects & DRIFTING_EFFECT) == DRIFTING_EFFECT) && ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN)) {
         if ((player->unk_0C0 / 182) > 0) {
             test = ((((player->unk_07C >> 0x10) * 0xD) + 0x2B1) / 106) + 0x28;
             player->unk_07C = test << 0x10;
@@ -4272,7 +4270,7 @@ void func_80036CB4(Player* player) {
         }
         player->effects &= ~DRIFTING_EFFECT;
     }
-    if (((player->effects & DRIFTING_EFFECT) == DRIFTING_EFFECT)) { // && ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN)) {
+    if (((player->effects & DRIFTING_EFFECT) == DRIFTING_EFFECT) && ((player->type & PLAYER_HUMAN) != PLAYER_HUMAN)) {
         player->effects &= ~DRIFTING_EFFECT;
     }
 }
@@ -4979,7 +4977,7 @@ void func_80038C6C(Player* player, UNUSED Camera* camera, s8 arg2, s8 playerId) 
     gPlayerLastVelocity[playerId][1] = sp88[1];
     gPlayerLastVelocity[playerId][2] = sp88[2];
 
-    // if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
+    if ((player->type & PLAYER_HUMAN) == PLAYER_HUMAN) {
         if (gKartTopSpeedTable[player->characterId] < player->speed) {
             divOptimize = gKartTopSpeedTable[player->characterId] / player->speed;
             player->velocity[0] *= divOptimize;
@@ -4987,7 +4985,7 @@ void func_80038C6C(Player* player, UNUSED Camera* camera, s8 arg2, s8 playerId) 
             player->velocity[2] *= divOptimize;
             player->speed = gKartTopSpeedTable[player->characterId];
         }
-    // }
+    }
     if ((player->unk_044 & 1) == 1) {
         if (player->speed > 1.0f) {
             player->velocity[0] *= 1.0f / player->speed;

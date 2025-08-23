@@ -6,7 +6,7 @@ else
   -- if not player.isHuman then
   if player.name == "Mario" then
 
-  else
+  -- else
     if (math.random() < 0.86) then
       local steerRange = 0.11
       local steerRand = (math.random() * 2 * steerRange) - steerRange
@@ -19,6 +19,7 @@ else
     if (math.random() < 0.3) then
           accelerate(player.id)
     end
-    printToScreen(4, "123456789112345678921234567")
+    -- printToScreen(4, "123456789112345678921234567")
+    accelerate(player.id)
   end
 end
