@@ -261,6 +261,9 @@ void lukas_cpu_terminate() {
 }
 
 void lukas_cpu_update_player(s32 playerId) {
+}
+
+void lukas_cpu_update_player2(s32 playerId) {
   Player* player;
   player = &gPlayers[playerId];
   if (lastPlayerId > playerId) {

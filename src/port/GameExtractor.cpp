@@ -56,11 +56,9 @@ std::optional<std::string> GameExtractor::ValidateChecksum() const {
 }
 
 bool GameExtractor::GenerateOTR() const {
-    const std::string assets_path = Ship::Context::GetAppBundlePath();
-    const std::string game_path = Ship::Context::GetAppDirectoryPath();
 
-    Companion::Instance = new Companion(this->mGameData, ArchiveType::O2R, false, assets_path, game_path);
-
+    Companion::Instance = new Companion(this->mGameData, ArchiveType::O2R, false);
+    
     try {
         Companion::Instance->Init(ExportType::Binary);
     } catch (const std::exception& e) {
